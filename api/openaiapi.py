@@ -5,9 +5,10 @@ import re
 
 
 class OpenAiApi():
-    def __init__(self,Lang,style):
+    def __init__(self,Lang,style,req):
         self.Lang = Lang
         self.style = style
+        self.req = req
     async def getRes(self):
         client = AsyncOpenAI(api_key=dotenv_values(".env")["OPENAI_API_KEY"],base_url=dotenv_values(".env")["OPENAI_BASE_URL"])
         
@@ -15,7 +16,7 @@ class OpenAiApi():
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are a bot that suject some song in Lang"},
-            {"role": "user", "content": f"can you suject a json list of song of {self.Lang}, style of songs are {self.style}, only json , key is title , artist and album"}
+            {"role": "user", "content": f"can you suject a json list of song of {self.Lang}, style of songs are {self.style},{self.req}, only json , key is title , artist and album"}
             ]
         )
         res = completion.choices[0].message.content

@@ -8,6 +8,9 @@ from urlextract import URLExtract
 from youtube_search import YoutubeSearch
 from api.openaiapi import OpenAiApi
 # Bot configuration
+import logging
+
+# logging.basicConfig(level=logging.DEBUG)  For debug
 load_dotenv()
 TOKEN = os.getenv("TOKEN") 
 PREFIX = "!"  
@@ -20,7 +23,7 @@ youtube_dl.utils.bug_reports_message = lambda: ""
 
 # FFmpeg options for audio streaming
 YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': True}
-FFMPEG_OPTIONS = {'options': '-vn'}
+FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5','options': '-vn'}
 
 extractor = URLExtract()
 
@@ -71,8 +74,8 @@ def next_song(ctx):
         next_url,next_title = playlist[guild_id].pop(0)
         vc = ctx.voice_client
         bot.loop.create_task(playSong(ctx=ctx, vc=vc, url=next_url, title=next_title))
-async def autocomplete_callback(ctx):
-    return ["Option1", "Option2", "Option3"]
+
+
 async def SearchSongWithList(songlist):
         songlist_url = []
         for song in songlist:
@@ -84,14 +87,14 @@ async def SearchSongWithList(songlist):
 async def autoplay(ctx , 
     lang = discord.Option(
         input_type="str",
-        default = 5,
+        default = "中文",
         required = True,
         description="Choose Lang",
         choices=["中文","粵語","英語","日語","混合"]
         ),
     style = discord.Option(
         input_type = "str",
-        default = 5,
+        default = "pop",
         required = True,
         description= "Choose songs style",
         choices = ["Pop ","Rock","Hip-Hop/Rap","R&B","Classical","no require"]
@@ -100,18 +103,29 @@ async def autoplay(ctx ,
         description="你可以選擇不選歌手",
         required = False,
         default = "None"
-        )
+        ),
+    requ = discord.Option(
+        input_type = "str",
+        description= "what you want",
+        default = ""
+    )
     ):
+    if not ctx.author.voice:
+        await ctx.respond("You need to be in a voice channel for me to join!")
+        return
+    channel = ctx.author.voice.channel
+    if not ctx.voice_client:
+        await channel.connect()
     await ctx.defer()
     guild = ctx.guild.id
     if guild  not in playlist:
         playlist[guild] = []
-    res = await OpenAiApi(Lang = lang , style = style).getRes()
+    res = await OpenAiApi(Lang = lang , style = style,req = requ).getRes()
     embed = discord.Embed(
         title = "Auto playlist",
         description= lang
     )
-    embed.add_field(name="",value=f"**{style if style ==None else "no"}**",inline=False)
+    embed.add_field(name="",value=f"**{style if style != None or style != "" else "No choosen style"}**",inline=False)
     songlist = []
     
     for key in list(res[0]):
@@ -131,7 +145,7 @@ async def autoplay(ctx ,
         url,title = playlist[guild].pop(0)
         await playSong(ctx=ctx,url = url,title = title ,vc=vc)
 @bot.slash_command(name="test",description="test",guild_ids=guild_id)
-async def autoplay(ctx):
+async def test(ctx):
     await ctx.respond(playlist)
             
         
@@ -159,11 +173,14 @@ async def play(ctx: discord.ApplicationContext, url: str):
         data = await getSong(ctx,url)
         playlist[guild].append((url,data["title"]))
         await ctx.respond(f"Added to the queue : {data["title"]}")
-@bot.slash_command(name="queue", description= "playlist of guild")
+@bot.slash_command(name="queue", description= "playlist of guild",guild_ids = guild_id)
 async def queue(ctx):
     guild = ctx.guild.id
-    if guild in playlist:
-       
+    res = ""
+    if guild in playlist and playlist[guild] != []:
+        for i in playlist[guild]:
+            res += i[1] + "\n" 
+        await ctx.respond(res)
     else:
         await ctx.respond("Nothing in queue ! Please use `/play <song>` add some song")
 @bot.slash_command(name="skip",description="skip the current music")
@@ -193,6 +210,7 @@ async def resume(ctx: discord.ApplicationContext):
 async def stop(ctx: discord.ApplicationContext):
     if ctx.voice_client and ctx.voice_client.is_playing():
         ctx.voice_client.stop()
+        playlist[ctx.guild.id] = [] # clear the queue of the guild
         await ctx.respond("Stopped the music!")
     else:
         await ctx.respond("There's no music playing to stop.")
@@ -217,4 +235,5 @@ async def load_extensions():
         print("Successfully loaded cogs.base!")
     except Exception as e:
         print(f"Failed to load cogs.base: {e}")
+
 bot.run(TOKEN)
