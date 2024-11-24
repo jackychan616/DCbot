@@ -1,4 +1,6 @@
 .env
 */_pycache_
 ./test.py
-*./_pycache_
+_pycache_/
+./output.mp3
+**/_pycache_
