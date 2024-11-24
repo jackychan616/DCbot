@@ -1,4 +1,4 @@
 .env
-/_pycache_
+*/_pycache_
 ./test.py
-./_pycache_
+*./_pycache_
