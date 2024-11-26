@@ -1,12 +1,13 @@
 from openai import OpenAI,AsyncOpenAI
 from dotenv import dotenv_values
 from models.music import Music
-def head(async_iterator): return async_iterator.__anext__()
 
 def CheckUSer(args):
     return True
 function_mapping = {
     "SkipSong": lambda bot, message: Music(bot = bot,message=message).SkipSong(),
+    "JoinVoiceChat": lambda bot,message: Music(bot=bot,message=message).JoinUserVC(),
+    "PlaySong": lambda bot,message: Music(bot=bot,message=message).PlaySong(),
     "CheckUSer": lambda bot , message: CheckUSer(message),
 }
 functions=[
@@ -25,8 +26,31 @@ functions=[
             "type" : "object",
             "properties": {}
         },
+    },
+    {
+        "name": "JoinVoiceChat",
+        "description": "Join Voice Chat",
+        "parameters": {
+            "type" : "object",
+            "properties": {}
+        }
+    },
+    {
+        "name": "PlaySong",
+        "description": "Play song that user wants or add the song to the playlist",
+        "parameters": {
+            "type" : "object",
+            "properties": {
+                "Song_name" : {
+                    "type": "string",
+                    "description": "The song that user required"
+                }            
+            },
+            "required" : ["Songname"]
+        }
     }
 ]
+
 class BotEvent():
     def __init__(self, msg,bot):
         self.msg = msg    
@@ -40,9 +64,10 @@ class BotEvent():
             ],
             functions = functions,
             function_call="auto"
-        )
+        ) 
+        # Content to User not yet done
         print(res)
-        if  res.choices[0].message.function_call != None:
+        if res.choices[0].message.function_call != None:
             function_call = res.choices[0].message.function_call
             function_name = function_call.name
             arguments = eval(function_call.arguments)
