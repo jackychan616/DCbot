@@ -78,8 +78,11 @@ class MusicCmd(commands.Cog):
                 await ctx.respond("I'm not connected to any voice channel.")
         else:
             await ctx.respond("fuck you join chat to kick me")
-
-
+    @discord.slash_command(name="clear",descriptoin = "Clear the queue",guild_ids = guild_id)
+    async def clear(self,ctx):
+        if ctx.guild.id in self.playlist: # clear guild playlist
+            self.playlist[ctx.guil.id] = []
+        await ctx.respond("Your queue is cleared ! ")
 
 
 
