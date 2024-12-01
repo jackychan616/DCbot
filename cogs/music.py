@@ -6,7 +6,7 @@ from youtube_search import YoutubeSearch
 from api.openaiapi import OpenAiApi
 from api.gc_tts import TTS
 from utils.langcode import getLangCode
-
+from temp.playlist import playlist
 guild_id = ["1162672034262814728","1181528878993395712"]       
 
 YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': True}
@@ -24,7 +24,7 @@ async def SearchSongWithList(songlist):
 class MusicCmd(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
-        self.playlist = {}
+        self.playlist = playlist
     async def getSong(self,ctx,song):
         with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
             try:
