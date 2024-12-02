@@ -161,11 +161,15 @@ class MusicCmd(commands.Cog):
         if not ctx.voice_client:
             await ctx.respond("I need to be in a voice channel to play music! Use /join first.")
             return
-        if extractor.has_urls(url):
-            url = extractor.find_urls[0]
-        else:
-            url = YoutubeSearch(url,max_results=10).to_dict()
-            url = "https://www.youtube.com/" + url[0]["url_suffix"]
+        try:
+            if extractor.has_urls(url):
+                url = extractor.find_urls[0]
+            else:
+                url = YoutubeSearch(url,max_results=10).to_dict()
+                url = "https://www.youtube.com/" + url[0]["url_suffix"]
+        except Exception as e:
+            await ctx.respond(e)
+            return
         vc = ctx.voice_client
         if not vc.is_playing():
             data = await self.getSong(ctx,url)

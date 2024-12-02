@@ -93,7 +93,7 @@ class BotEvent():
         self.user_name = user_name
         if user_id not in user_message:
             user_message[user_id] = [
-                {"role": "system", "content": "You are a assistant. Provide helpful responses and call functions when necessary. The creator is Jacky Chan , discord id is Uncontrollable_Force"},
+                {"role": "system", "content": "You are a assistant. Provide helpful responses and call functions when necessary.this user user name is " + user_name},
                 {"role":"user","content":f"{self.msg.content}"}
             ]
         else:

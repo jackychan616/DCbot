@@ -42,7 +42,8 @@ async def on_ready():
     
 @bot.slash_command(name="test", description="test",guild_ids = guild_id)
 async def test(ctx):
-    await BotEvent(ctx,bot).SkipSong()
+    user = await bot.fetch_user(786759023361785867)
+    await user.send("Hello there!")
 async def load_extensions():
     try:
         await bot.load_extension("cogs.base")

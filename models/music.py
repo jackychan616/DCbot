@@ -17,8 +17,9 @@ async def SearchSongWithList(songlist):
             songlist_url.append(url)
         return songlist_url  
 class MuiscCore():
-    def __init__(self):
+    def __init__(self,bot):
         self.playlist = playlist
+        self.bot = bot
     async def getSong(self,ctx,song):
         with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
             try:
@@ -52,12 +53,12 @@ class Music():
         self.message = message
         self.arguments = arguments
         self.playlist = playlist
-        self.getSong = MuiscCore().getSong
+        self.getSong = MuiscCore(self.bot).getSong
     async def SkipSong(self):
         print("SkipSong")
         if self.message.guild.voice_client and self.message.guild.voice_client.is_playing():
             self.message.guild.voice_client.stop()
-            await self.message.reply("Skipped")        
+            # await self.message.reply("Skipped")        
         else:
             await self.message.reply("No song playing")        
     async def JoinUserVC(self):
@@ -74,10 +75,10 @@ class Music():
         vc = self.message.guild.voice_client
         guild = self.message.guild.id
         if vc.is_playing():
-            data = await MuiscCore().getSong(ctx= self.message,song = url)
-            await self.message.reply("Song is already playing")
+            data = await MuiscCore(bot = self.bot).getSong(ctx= self.message,song = url)
+            # await self.message.reply("Song is already playing")
             return self.playlist[guild].append((url,data["title"]))
-        return await MuiscCore().playSong(ctx=self.message,url = url,title = song,vc = vc)
+        return await MuiscCore(bot = self.bot).playSong(ctx=self.message,url = url,title = song,vc = vc)
     async def PlayListOfSongs(self):
         songlist = eval(self.arguments["Song_list"])
         songlist_url = await SearchSongWithList(songlist)
@@ -87,13 +88,23 @@ class Music():
             self.playlist[guild] = []
         if vc.is_playing():
             for song in songlist_url:
-                data = await MuiscCore().getSong(ctx= self.message,song = song)
+                data = await MuiscCore(bot = self.bot).getSong(ctx= self.message,song = song)
                 self.playlist[guild].append((song,data["title"]))
             await self.message.reply("Songs added to playlist")
-            return
         else:
             i = 0
             for song in songlist_url:
                 self.playlist[guild].append((song, songlist[i]))
                 i += 1
-            return await MuiscCore().playSong(ctx=self.message,url = songlist_url[0],title = songlist[0],vc = vc)
+            await MuiscCore(bot = self.bot).playSong(ctx=self.message,url = songlist_url[0],title = songlist[0],vc = vc)
+            self.playlist[guild].pop(0)
+        embed = discord.Embed(
+            title = "Auto playlist",
+            description= self.message.author.name + " added songs to playlist",
+        )
+        for i in songlist:
+            embed.add_field(name="",
+                            value=i,
+                            inline=False
+            )
+        await self.message.channel.send(embed = embed)
