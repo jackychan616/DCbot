@@ -1,0 +1,7 @@
+openai
+dotenv
+py-cord
+logging
+yt_dlp
+urlextract
+youtube_search

@@ -44,7 +44,7 @@ class MusicCmd(commands.Cog):
     async def NextSongNoti(self,ctx,title):
                 lg_c = await getLangCode(title)
                 print(lg_c)
-                await TTS(text = title,Lang_code = lg_c).getAudio()
+                # await TTS(text = title,Lang_code = lg_c).getAudio()
                 ctx.voice_client.play(discord.FFmpegPCMAudio("output.mp3"),after = ctx.voice_client.stop())
                 return
     async def playSong(self,ctx,url,title,vc):

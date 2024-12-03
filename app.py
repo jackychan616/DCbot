@@ -33,6 +33,8 @@ async def on_message(message: discord.Message):
         return
     if "<@1309145643629150218>" in message.content:
         await BotEvent(msg = message,bot=bot,user_id = message.author.id,user_name = message.author.name).OpenaiApi()
+    if 1313125413534437398 == message.channel.id: 
+        await BotEvent(msg = message,bot=bot,user_id = message.author.id,user_name = message.author.name).OpenaiApi()
     # await message.reply(message)
 
 
