@@ -128,7 +128,7 @@ class MusicCmd(commands.Cog):
         title = "Auto playlist",
         description= lang
     )
-        embed.add_field(name="",value=f"**{style if style != None or style != "" else "No choosen style"}**",inline=False)
+        embed.add_field(name="",value=f"{style if style != None or style != "" else "No choosen style"}",inline=False)
         songlist = []
     
         for key in list(res[0]):
