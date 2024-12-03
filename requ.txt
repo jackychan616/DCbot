@@ -1,7 +1,10 @@
 openai
-dotenv
+python-dotenv
 py-cord
-logging
+py-cord[voice]
+py-cord[speed]
 yt_dlp
 urlextract
 youtube_search
+youtube-dl
+google-cloud-texttospeech
